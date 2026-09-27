@@ -1,0 +1,5 @@
+investigation "Live Integration Test" {
+    processes = Process.collect()
+    network = Network.connections()
+    system = System.info()
+}
