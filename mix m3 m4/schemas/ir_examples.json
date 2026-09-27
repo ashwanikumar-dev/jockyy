@@ -1,0 +1,386 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JOCKY Forensic Intermediate Representation (IR) Specification",
+  "ir_version": "v0.1.0",
+  "description": "Frozen Day 1 canonical JSON schema and examples for the 9 Forensic IR instructions mapped from JOCKY Grammar v0.1",
+  "instruction_set": [
+    {
+      "op": "INVESTIGATION_BEGIN",
+      "description": "Introduces the root investigation container and initializes agent execution scope",
+      "required_params": [
+        "investigation_name",
+        "investigation_id",
+        "timestamp_utc"
+      ]
+    },
+    {
+      "op": "COLLECT_SYSTEM_INFO",
+      "description": "Low-level kernel inspection extracting host architecture, OS build, memory, and uptime",
+      "required_params": [
+        "output_variable"
+      ]
+    },
+    {
+      "op": "COLLECT_PROCESSES",
+      "description": "Enumerates snapshot of running processes (PID, PPID, executable path, command line, memory working set)",
+      "required_params": [
+        "output_variable"
+      ]
+    },
+    {
+      "op": "FILTER_PROCESSES",
+      "description": "Evaluates a declarative boolean predicate over a ProcessSet to yield a filtered ProcessSet",
+      "required_params": [
+        "source_variable",
+        "output_variable",
+        "predicate"
+      ]
+    },
+    {
+      "op": "COLLECT_NETWORK_CONNECTIONS",
+      "description": "Queries TCP/IP socket tables for active and established network connections",
+      "required_params": [
+        "output_variable"
+      ]
+    },
+    {
+      "op": "COLLECT_NETWORK_LISTENERS",
+      "description": "Queries TCP/IP socket tables for bound listening ports and listeners",
+      "required_params": [
+        "output_variable"
+      ]
+    },
+    {
+      "op": "PRESERVE_EVIDENCE",
+      "description": "Builds a RawEvidence envelope, computes SHA-256 digest, and signs chain-of-custody entry",
+      "required_params": [
+        "source_variable",
+        "evidence_tag"
+      ]
+    },
+    {
+      "op": "VERIFY_EVIDENCE",
+      "description": "Re-hashes preserved evidence artifact and evaluates cryptographic integrity (returns Boolean)",
+      "required_params": [
+        "evidence_variable"
+      ]
+    },
+    {
+      "op": "INVESTIGATION_END",
+      "description": "Closes the investigation execution context and unloads agent task state",
+      "required_params": [
+        "investigation_id",
+        "status"
+      ]
+    }
+  ],
+  "examples": [
+    {
+      "example_id": "EX-01-REALISTIC-COMBINED-INVESTIGATION",
+      "source_reference": "JOCKY Grammar Specification v0.1 Section 7.6",
+      "source_script": "investigation \"Endpoint Triage\" {\n    sys = System.info()\n    sys_evidence = Evidence.preserve(sys)\n    processes = Process.collect()\n    suspicious = processes.filter((name == \"powershell.exe\" or name == \"cmd.exe\") and memory > 500MB)\n    process_evidence = Evidence.preserve(suspicious)\n    listeners = Network.listeners()\n    listener_evidence = Evidence.preserve(listeners)\n    process_ok = Evidence.verify(process_evidence)\n    listener_ok = Evidence.verify(listener_evidence)\n}",
+      "ir_document": {
+        "ir_version": "v0.1.0",
+        "investigation_id": "inv-2026-sih-001",
+        "investigation_name": "Endpoint Triage",
+        "instructions": [
+          {
+            "sequence": 1,
+            "op": "INVESTIGATION_BEGIN",
+            "params": {
+              "investigation_id": "inv-2026-sih-001",
+              "investigation_name": "Endpoint Triage",
+              "timestamp_utc": "2026-09-24T13:46:00Z"
+            }
+          },
+          {
+            "sequence": 2,
+            "op": "COLLECT_SYSTEM_INFO",
+            "params": {
+              "output_variable": "sys"
+            }
+          },
+          {
+            "sequence": 3,
+            "op": "PRESERVE_EVIDENCE",
+            "params": {
+              "source_variable": "sys",
+              "evidence_tag": "sys_evidence"
+            }
+          },
+          {
+            "sequence": 4,
+            "op": "COLLECT_PROCESSES",
+            "params": {
+              "output_variable": "processes"
+            }
+          },
+          {
+            "sequence": 5,
+            "op": "FILTER_PROCESSES",
+            "params": {
+              "source_variable": "processes",
+              "output_variable": "suspicious",
+              "predicate": {
+                "type": "LogicalAnd",
+                "left": {
+                  "type": "LogicalOr",
+                  "left": {
+                    "type": "Comparison",
+                    "op": "==",
+                    "field": "name",
+                    "literal": {
+                      "type": "String",
+                      "value": "powershell.exe"
+                    }
+                  },
+                  "right": {
+                    "type": "Comparison",
+                    "op": "==",
+                    "field": "name",
+                    "literal": {
+                      "type": "String",
+                      "value": "cmd.exe"
+                    }
+                  }
+                },
+                "right": {
+                  "type": "Comparison",
+                  "op": ">",
+                  "field": "memory",
+                  "literal": {
+                    "type": "ByteSize",
+                    "value_bytes": 524288000,
+                    "raw_unit": "500MB"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "sequence": 6,
+            "op": "PRESERVE_EVIDENCE",
+            "params": {
+              "source_variable": "suspicious",
+              "evidence_tag": "process_evidence"
+            }
+          },
+          {
+            "sequence": 7,
+            "op": "COLLECT_NETWORK_LISTENERS",
+            "params": {
+              "output_variable": "listeners"
+            }
+          },
+          {
+            "sequence": 8,
+            "op": "PRESERVE_EVIDENCE",
+            "params": {
+              "source_variable": "listeners",
+              "evidence_tag": "listener_evidence"
+            }
+          },
+          {
+            "sequence": 9,
+            "op": "VERIFY_EVIDENCE",
+            "params": {
+              "evidence_variable": "process_evidence"
+            }
+          },
+          {
+            "sequence": 10,
+            "op": "VERIFY_EVIDENCE",
+            "params": {
+              "evidence_variable": "listener_evidence"
+            }
+          },
+          {
+            "sequence": 11,
+            "op": "INVESTIGATION_END",
+            "params": {
+              "investigation_id": "inv-2026-sih-001",
+              "status": "SUCCESS"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "example_id": "EX-02-SYSTEM-INFORMATION",
+      "source_reference": "JOCKY Grammar Specification v0.1 Section 7.1",
+      "source_script": "investigation \"Host Baseline\" {\n    sys = System.info()\n    evidence = Evidence.preserve(sys)\n}",
+      "ir_document": {
+        "ir_version": "v0.1.0",
+        "investigation_id": "inv-2026-sih-002",
+        "investigation_name": "Host Baseline",
+        "instructions": [
+          {
+            "sequence": 1,
+            "op": "INVESTIGATION_BEGIN",
+            "params": {
+              "investigation_id": "inv-2026-sih-002",
+              "investigation_name": "Host Baseline",
+              "timestamp_utc": "2026-09-24T13:46:00Z"
+            }
+          },
+          {
+            "sequence": 2,
+            "op": "COLLECT_SYSTEM_INFO",
+            "params": {
+              "output_variable": "sys"
+            }
+          },
+          {
+            "sequence": 3,
+            "op": "PRESERVE_EVIDENCE",
+            "params": {
+              "source_variable": "sys",
+              "evidence_tag": "evidence"
+            }
+          },
+          {
+            "sequence": 4,
+            "op": "INVESTIGATION_END",
+            "params": {
+              "investigation_id": "inv-2026-sih-002",
+              "status": "SUCCESS"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "example_id": "EX-03-PROCESS-FILTERING-COMBINATORS",
+      "source_reference": "JOCKY Grammar Specification v0.1 Section 7.4",
+      "source_script": "investigation \"Named and Sized\" {\n    processes = Process.collect()\n    suspicious = processes.filter(\n        name == \"powershell.exe\" and memory > 500MB\n    )\n    evidence = Evidence.preserve(suspicious)\n}",
+      "ir_document": {
+        "ir_version": "v0.1.0",
+        "investigation_id": "inv-2026-sih-003",
+        "investigation_name": "Named and Sized",
+        "instructions": [
+          {
+            "sequence": 1,
+            "op": "INVESTIGATION_BEGIN",
+            "params": {
+              "investigation_id": "inv-2026-sih-003",
+              "investigation_name": "Named and Sized",
+              "timestamp_utc": "2026-09-24T13:46:00Z"
+            }
+          },
+          {
+            "sequence": 2,
+            "op": "COLLECT_PROCESSES",
+            "params": {
+              "output_variable": "processes"
+            }
+          },
+          {
+            "sequence": 3,
+            "op": "FILTER_PROCESSES",
+            "params": {
+              "source_variable": "processes",
+              "output_variable": "suspicious",
+              "predicate": {
+                "type": "LogicalAnd",
+                "left": {
+                  "type": "Comparison",
+                  "op": "==",
+                  "field": "name",
+                  "literal": {
+                    "type": "String",
+                    "value": "powershell.exe"
+                  }
+                },
+                "right": {
+                  "type": "Comparison",
+                  "op": ">",
+                  "field": "memory",
+                  "literal": {
+                    "type": "ByteSize",
+                    "value_bytes": 524288000,
+                    "raw_unit": "500MB"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "sequence": 4,
+            "op": "PRESERVE_EVIDENCE",
+            "params": {
+              "source_variable": "suspicious",
+              "evidence_tag": "evidence"
+            }
+          },
+          {
+            "sequence": 5,
+            "op": "INVESTIGATION_END",
+            "params": {
+              "investigation_id": "inv-2026-sih-003",
+              "status": "SUCCESS"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "example_id": "EX-04-NETWORK-SNAPSHOT",
+      "source_reference": "JOCKY Grammar Specification v0.1 Section 7.5",
+      "source_script": "investigation \"Network Snapshot\" {\n    connections = Network.connections()\n    listeners = Network.listeners()\n    net_evidence = Evidence.preserve(connections)\n    listener_evidence = Evidence.preserve(listeners)\n}",
+      "ir_document": {
+        "ir_version": "v0.1.0",
+        "investigation_id": "inv-2026-sih-004",
+        "investigation_name": "Network Snapshot",
+        "instructions": [
+          {
+            "sequence": 1,
+            "op": "INVESTIGATION_BEGIN",
+            "params": {
+              "investigation_id": "inv-2026-sih-004",
+              "investigation_name": "Network Snapshot",
+              "timestamp_utc": "2026-09-24T13:46:00Z"
+            }
+          },
+          {
+            "sequence": 2,
+            "op": "COLLECT_NETWORK_CONNECTIONS",
+            "params": {
+              "output_variable": "connections"
+            }
+          },
+          {
+            "sequence": 3,
+            "op": "COLLECT_NETWORK_LISTENERS",
+            "params": {
+              "output_variable": "listeners"
+            }
+          },
+          {
+            "sequence": 4,
+            "op": "PRESERVE_EVIDENCE",
+            "params": {
+              "source_variable": "connections",
+              "evidence_tag": "net_evidence"
+            }
+          },
+          {
+            "sequence": 5,
+            "op": "PRESERVE_EVIDENCE",
+            "params": {
+              "source_variable": "listeners",
+              "evidence_tag": "listener_evidence"
+            }
+          },
+          {
+            "sequence": 6,
+            "op": "INVESTIGATION_END",
+            "params": {
+              "investigation_id": "inv-2026-sih-004",
+              "status": "SUCCESS"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

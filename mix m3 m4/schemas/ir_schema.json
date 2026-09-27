@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JOCKY Forensic Intermediate Representation (IR) Schema v0.1.0",
+  "description": "JSON Schema specification for JOCKY Forensic IR v0.1.0 instruction set and execution documents",
+  "type": "object",
+  "required": [
+    "ir_version",
+    "investigation_id",
+    "investigation_name",
+    "instructions"
+  ],
+  "properties": {
+    "ir_version": {
+      "type": "string",
+      "const": "v0.1.0",
+      "description": "Authoritative frozen version identifier of the Forensic IR"
+    },
+    "investigation_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier of the investigation container"
+    },
+    "investigation_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable investigation title"
+    },
+    "target_scope": {
+      "type": "string",
+      "default": "ALL",
+      "description": "Endpoint targeting criteria (e.g. ALL, hostname, or tag)"
+    },
+    "instructions": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/instruction"
+      }
+    }
+  },
+  "$defs": {
+    "instruction": {
+      "type": "object",
+      "required": ["sequence", "op", "params"],
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "op": {
+          "type": "string",
+          "enum": [
+            "INVESTIGATION_BEGIN",
+            "COLLECT_SYSTEM_INFO",
+            "COLLECT_PROCESSES",
+            "FILTER_PROCESSES",
+            "COLLECT_NETWORK_CONNECTIONS",
+            "COLLECT_NETWORK_LISTENERS",
+            "PRESERVE_EVIDENCE",
+            "VERIFY_EVIDENCE",
+            "INVESTIGATION_END"
+          ]
+        },
+        "params": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}
