@@ -16,7 +16,7 @@ impl Default for AgentConfig {
             .unwrap_or_else(|_| "WIN-ENDPOINT".to_string());
 
         Self {
-            backend_url: "http://127.0.0.1:8000".to_string(),
+            backend_url: std::env::var("JOCKY_BACKEND_URL").unwrap_or_else(|_| "http://127.0.0.1:8000".to_string()),
             machine_id: hostname,
             state_file: PathBuf::from("agent_state.json"),
         }
