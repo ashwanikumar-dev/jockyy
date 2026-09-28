@@ -10,7 +10,8 @@ from .models import (
 
 
 class InvestigationCreate(BaseModel):
-    script: str
+    script: str | None = None
+    compiled_ir: dict | None = None
 
 
 class InvestigationResponse(BaseModel):

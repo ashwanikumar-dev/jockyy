@@ -17,27 +17,32 @@ def create_investigation(
     data: InvestigationCreate,
     db: Session = Depends(get_db),
 ):
+    if data.compiled_ir is None and not data.script:
+        raise HTTPException(
+            status_code=400,
+            detail="Either script or compiled_ir is required",
+        )
+
     investigation = models.Investigation(
         script=data.script,
+        compiled_ir=data.compiled_ir,
     )
 
     db.add(investigation)
     db.flush()
 
-    try:
-        compiled_ir = compile_script(
-            data.script,
-            str(investigation.investigation_id),
-        )
-    except CompilerServiceError as exc:
-        db.rollback()
-
-        raise HTTPException(
-            status_code=400,
-            detail=f"JOCKY compilation failed: {exc}",
-        ) from exc
-
-    investigation.compiled_ir = compiled_ir
+    if data.compiled_ir is None:
+        try:
+            investigation.compiled_ir = compile_script(
+                data.script,
+                str(investigation.investigation_id),
+            )
+        except CompilerServiceError as exc:
+            db.rollback()
+            raise HTTPException(
+                status_code=400,
+                detail=f"JOCKY compilation failed: {exc}",
+            ) from exc
 
     db.commit()
     db.refresh(investigation)

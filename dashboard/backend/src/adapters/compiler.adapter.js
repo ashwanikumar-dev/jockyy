@@ -8,11 +8,7 @@ const { spawnSync } = require("child_process");
 const logger = require("../utils/logger");
 
 const COMPILER_BINARY_PATH =
-  process.env.COMPILER_PATH ||
-  path.resolve(
-    __dirname,
-    "../../../../mix m3 m4/compiler/target/debug/compiler.exe",
-  );
+  "C:\\JOCKEY\\mix m3 m4\\compiler\\target\\debug\\compiler.exe";
 
 /**
  * Compile JOCKY DSL using the real M3 compiler.

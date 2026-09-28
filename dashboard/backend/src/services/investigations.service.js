@@ -78,6 +78,7 @@ module.exports = {
     if (script) {
       m5Investigation = await m5Client.post("/investigations", {
         script,
+        compiled_ir: compiledResult.ir,
       });
     }
 
