@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 
 from .. import models
 
-HIGH_MEMORY_THRESHOLD_BYTES = 50 * 1024 * 1024
+HIGH_MEMORY_THRESHOLD_BYTES = 500 * 1024 * 1024
 
 
 def detect_high_memory_processes(
