@@ -75,7 +75,9 @@ export function InvestigationModal({ isOpen, onClose }) {
             setEvidenceItems(scopedEvidence);
 
             // Fetch all findings and scope them to this investigation/evidence.
-            const findingsResponse = await getFindings();
+            const findingsResponse = await getFindings(
+              investigation.m5_investigation_id,
+            );
 
             const allFindings = Array.isArray(findingsResponse?.data)
               ? findingsResponse.data
