@@ -41,10 +41,11 @@ export function InvestigationModal({ isOpen, onClose }) {
   const [executionStatus, setExecutionStatus] = useState(null);
   const [findings, setFindings] = useState([]);
   const [evidenceItems, setEvidenceItems] = useState([]);
+  const [currentTaskId, setCurrentTaskId] = useState(null);
   const [timelineEvents, setTimelineEvents] = useState([]);
   const [dispatchAlert, setDispatchAlert] = useState(null);
 
-  const pollInvestigationStatus = async (investigationId) => {
+  const pollInvestigationStatus = async (investigationId, taskId) => {
     const poll = async () => {
       try {
         const response = await getInvestigation(investigationId);
@@ -78,10 +79,7 @@ export function InvestigationModal({ isOpen, onClose }) {
               : [];
 
             const scopedEvidence = allEvidence.filter(
-              (evidence) =>
-                evidence.investigation_id ===
-                  investigation.m5_investigation_id ||
-                evidence.investigation_id === investigation.investigation_id,
+              (evidence) => String(evidence.task_id) === String(taskId),
             );
 
             setEvidenceItems(scopedEvidence);
@@ -192,9 +190,10 @@ export function InvestigationModal({ isOpen, onClose }) {
 
       // 2. Dispatch the persisted investigation to a real M5 agent.
       const result = await runInvestigation(investigation.investigation_id);
-      pollInvestigationStatus(investigation.investigation_id);
+      pollInvestigationStatus(investigation.investigation_id, taskId);
 
       const taskId = result?.task?.task_id;
+      setCurrentTaskId(taskId);
       const agentId = result?.agent_id;
       const machineId = result?.machine_id;
 
