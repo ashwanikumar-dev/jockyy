@@ -20,7 +20,7 @@ def detect_high_memory_processes(
     findings = []
 
     for process in processes:
-        memory_bytes = process.get("memory_bytes")
+        memory_bytes = process.get("memory_usage")
 
         if memory_bytes is None:
             continue
