@@ -736,9 +736,10 @@ export function InvestigationModal({ isOpen, onClose }) {
                       <div
                         style={{
                           display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          gap: "8px",
+                          flexDirection: "column",
+                          gap: "10px",
+                          maxHeight: "400px",
+                          overflowY: "auto",
                         }}
                       >
                         <strong style={{ fontSize: "12px" }}>
