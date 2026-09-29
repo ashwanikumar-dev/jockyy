@@ -62,16 +62,6 @@ export function InvestigationModal({ isOpen, onClose }) {
 
         if (status === "completed") {
           try {
-            const findingsResponse = await getFindings(
-              investigation.m5_investigation_id,
-            );
-
-            const investigationFindings =
-              findingsResponse?.data || findingsResponse || [];
-
-            setFindings(
-              Array.isArray(investigationFindings) ? investigationFindings : [],
-            );
             const evidenceResponse = await getEvidence();
 
             const allEvidence = Array.isArray(evidenceResponse)
@@ -83,6 +73,30 @@ export function InvestigationModal({ isOpen, onClose }) {
             );
 
             setEvidenceItems(scopedEvidence);
+
+            // Fetch all findings and scope them to this investigation/evidence.
+            const findingsResponse = await getFindings();
+
+            const allFindings = Array.isArray(findingsResponse?.data)
+              ? findingsResponse.data
+              : Array.isArray(findingsResponse)
+                ? findingsResponse
+                : [];
+
+            const currentEvidenceIds = new Set(
+              scopedEvidence.map((evidence) =>
+                String(evidence.evidence_id ?? evidence.id),
+              ),
+            );
+
+            const scopedFindings = allFindings.filter(
+              (finding) =>
+                String(finding.investigation_id) ===
+                  String(investigation.m5_investigation_id) ||
+                currentEvidenceIds.has(String(finding.evidence_id)),
+            );
+
+            setFindings(scopedFindings);
             const timelineResponse = await getTimeline(
               investigation.m5_investigation_id,
             );
