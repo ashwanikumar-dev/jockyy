@@ -738,7 +738,7 @@ export function InvestigationModal({ isOpen, onClose }) {
                           display: "flex",
                           flexDirection: "column",
                           gap: "10px",
-                          maxHeight: "400px",
+                          maxHeight: "300px",
                           overflowY: "auto",
                         }}
                       >
