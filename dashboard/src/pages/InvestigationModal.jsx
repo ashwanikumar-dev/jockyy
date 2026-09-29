@@ -190,12 +190,12 @@ export function InvestigationModal({ isOpen, onClose }) {
 
       // 2. Dispatch the persisted investigation to a real M5 agent.
       const result = await runInvestigation(investigation.investigation_id);
-      pollInvestigationStatus(investigation.investigation_id, taskId);
 
       const taskId = result?.task?.task_id;
-      setCurrentTaskId(taskId);
       const agentId = result?.agent_id;
       const machineId = result?.machine_id;
+
+      setCurrentTaskId(taskId);
 
       setDispatchAlert({
         investigationId: investigation.investigation_id,
@@ -203,6 +203,8 @@ export function InvestigationModal({ isOpen, onClose }) {
         agentId,
         machineId,
       });
+
+      pollInvestigationStatus(investigation.investigation_id, taskId);
 
       setIsReadyToRun(false);
     } catch (error) {
