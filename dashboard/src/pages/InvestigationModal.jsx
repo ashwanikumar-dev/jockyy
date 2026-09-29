@@ -25,7 +25,7 @@ const DEFAULT_SCRIPT = `investigation "Endpoint Triage" {
     Evidence.verify(ev)
 }`;
 
-export function InvestigationModal({ isOpen, onClose, showNotification }) {
+export function InvestigationModal({ isOpen, onClose }) {
   const [script, setScript] = useState(DEFAULT_SCRIPT);
   const [compileState, setCompileState] = useState("idle"); // "idle" | "compiling" | "success" | "error"
   const [pipelineStep, setPipelineStep] = useState("idle"); // "idle" | "parsing" | "ast" | "ir" | "complete" | "error"
@@ -84,9 +84,7 @@ export function InvestigationModal({ isOpen, onClose, showNotification }) {
                 evidence.investigation_id === investigation.investigation_id,
             );
 
-            setEvidenceItems(
-              scopedEvidence.length > 0 ? scopedEvidence : allEvidence,
-            );
+            setEvidenceItems(scopedEvidence);
             const timelineResponse = await getTimeline(
               investigation.m5_investigation_id,
             );
