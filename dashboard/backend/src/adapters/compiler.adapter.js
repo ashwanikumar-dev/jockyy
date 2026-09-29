@@ -98,7 +98,14 @@ module.exports = {
       let ir;
 
       try {
-        ir = JSON.parse(stdout);
+        const jsonStart = stdout.indexOf("{");
+        const jsonEnd = stdout.lastIndexOf("}");
+
+        if (jsonStart === -1 || jsonEnd === -1) {
+          throw new Error("No JSON object found in compiler output.");
+        }
+
+        ir = JSON.parse(stdout.slice(jsonStart, jsonEnd + 1));
       } catch (parseError) {
         logger.error("Failed to parse M3 compiler JSON output", {
           stdout,
