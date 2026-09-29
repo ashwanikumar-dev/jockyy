@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 
 from .. import models
 
-HIGH_MEMORY_THRESHOLD_BYTES = 500 * 1024 * 1024  # 500 MB
+HIGH_MEMORY_THRESHOLD_BYTES = 50 * 1024 * 1024
 
 
 def detect_high_memory_processes(
@@ -20,7 +20,7 @@ def detect_high_memory_processes(
     findings = []
 
     for process in processes:
-        memory_bytes = process.get("memory_usage")
+        memory_bytes = process.get("memory_bytes")
 
         if memory_bytes is None:
             continue

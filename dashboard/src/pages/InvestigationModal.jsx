@@ -804,6 +804,8 @@ export function InvestigationModal({ isOpen, onClose }) {
                     display: "flex",
                     flexDirection: "column",
                     gap: "10px",
+                    maxHeight: "300px",
+                    overflowY: "auto",
                   }}
                 >
                   {evidenceItems.map((evidence) => (
