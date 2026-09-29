@@ -9,6 +9,7 @@ import {
   createInvestigation,
   runInvestigation,
   getInvestigation,
+  getEvidence,
   getFindings,
   getEvidenceItem,
   getTimeline,
@@ -70,19 +71,22 @@ export function InvestigationModal({ isOpen, onClose, showNotification }) {
             setFindings(
               Array.isArray(investigationFindings) ? investigationFindings : [],
             );
-            const uniqueEvidenceIds = [
-              ...new Set(
-                investigationFindings
-                  .map((finding) => finding.evidence_id)
-                  .filter(Boolean),
-              ),
-            ];
-            const evidenceResults = await Promise.all(
-              uniqueEvidenceIds.map((evidenceId) =>
-                getEvidenceItem(evidenceId),
-              ),
+            const evidenceResponse = await getEvidence();
+
+            const allEvidence = Array.isArray(evidenceResponse)
+              ? evidenceResponse
+              : [];
+
+            const scopedEvidence = allEvidence.filter(
+              (evidence) =>
+                evidence.investigation_id ===
+                  investigation.m5_investigation_id ||
+                evidence.investigation_id === investigation.investigation_id,
             );
-            setEvidenceItems(evidenceResults.filter(Boolean));
+
+            setEvidenceItems(
+              scopedEvidence.length > 0 ? scopedEvidence : allEvidence,
+            );
             const timelineResponse = await getTimeline(
               investigation.m5_investigation_id,
             );
